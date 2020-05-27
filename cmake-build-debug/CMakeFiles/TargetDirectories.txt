@@ -1,0 +1,3 @@
+D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/cmake-build-debug/CMakeFiles/ASCII_ART.dir
+D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/cmake-build-debug/CMakeFiles/rebuild_cache.dir
