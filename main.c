@@ -5,10 +5,10 @@
 
 const int NUM_BRIGHT_ROW = 4;
 const int NUM_BRIGHT_COL = 2;
-const int SEC_LEN = 2;
+const int SEC_LEN = 1;
 
 char *IMG = "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/images/testGif2.gif";
-char *FONT_FILE = "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/images/fontInfo.txt";
+char *FONT_FILE = "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/fontInfo.txt";
 char *OUTPUT = "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/result.txt";
 
 // given a file path and mode, opens up a file
