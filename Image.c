@@ -5,6 +5,10 @@
 
 #include "stb_image.h"
 #include "stb_image_write.h"
+#include <stdio.h>
+
+extern char *IMG_OUTPUT;
+extern char *GIF_OUTPUT;
 
 // returns a struct that contains an array of pixels, width and height of an image
 // in grey scale. Exits program if unable to load image.
@@ -60,12 +64,13 @@ Image *createPixelResult(const unsigned char *charResult, Character *chars, Font
     return result;
 }
 
-void createJpgOfResult(unsigned char *charResult, Character *chars, Font font, int charPerRow, int charPerCol, int fileNum) {
+void
+createJpgOfResult(unsigned char *charResult, Character *chars, Font font, int charPerRow, int charPerCol, int fileNum) {
     Image *img = createPixelResult(charResult, chars, font, charPerRow, charPerCol);
 
     char ch[80];
     if (fileNum == -1) {
-        sprintf(ch, "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/results.jpg");
+        sprintf(ch, "%s", IMG_OUTPUT);
     } else {
         sprintf(ch, "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/imageOutput/frame_0%d.jpg", fileNum);
     }
@@ -94,7 +99,7 @@ Gif *getGif(const char *filename) {
     int req_comp = 1;
 
     stbi_uc *loadedGif = stbi_load_gif_from_memory(buffer, size, &delays, &width, &height, &frames, &comp,
-                                                         req_comp);
+                                                   req_comp);
     free(buffer);
 
     if (loadedGif == NULL) {
@@ -118,4 +123,20 @@ void writeGif(Gif *gif) {
         sprintf(ch, "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/imageOutput/frame_0%d.jpg", i);
         stbi_write_jpg(ch, gif->width, gif->height, 1, gif->pix + gif->width * gif->height * i, 0);
     }
+}
+
+ge_GIF *getGifOut(Image *image) {
+    ge_GIF *gifOut = ge_new_gif(
+            GIF_OUTPUT,                 // name of gif
+            image->width,               // width of canvas
+            image->height,              // height of canvas
+            (uint8_t[]) {        // palette
+                    0x00, 0x00, 0x00,   // 0 -> black
+                    0xFF, 0xFF, 0xFF    // 1 -> white
+            },
+            1,                    // palette depth == log2(# of colors)
+            0                      // infinite loop
+    );
+
+    return gifOut;
 }
