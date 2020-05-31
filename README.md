@@ -10,9 +10,11 @@ will be converted to one character.
 
     const int SEC_LEN = 2;
 
-    char *IMG = "path to image to convert";
+    char *IMG = "path to image (or gif) to convert";
     char *FONT_FILE = "path to font info file";
     char *OUTPUT = "path to text file output";
+    char *GIF_OUTPUT = "path to gif file output";
+    char *IMG_OUTPUT = "path to img file output";
     
 ##How To Change Font
 To change what font the program uses, you need to create a new fontInfo file and update the
@@ -37,16 +39,9 @@ The format of the fontInfo text file is as follows:
     
 There is a special case for the character ' ' (space). Because white space is usually used
 as a delimiter, I used the equal sign to represent the space character because I am lazy.
+The current font used in the project is Consolas Regular simply because it is the default
+font for windows notepad. 
 
 ## GIFS
-
-Gifs are defiantly still a work in progress. Change the IMG variable to the path of the Gif
-you want to use just like you would any image.
-
-However instead of producing a nice Gif output, the program outputs each frame of the GIF
-to the imageOutput sub-directory. Each frame is named: frame_0x.jpg, where x is the number
-representing the order of the frame so 00 is the first frame, 01 is the second and so on.
-There are many online converters that allow you to create a gif from a bunch of images. 
-However, I use a command line tool called [ImageMagick](https://imagemagick.org/index.php).
-There is a simple bat file createGif.bat that runs the program and then
-uses ImageMagick to create the gif.
+Change the `char *IMG` variable to the path of the GIF you want to convert. The program will write to
+whatever the file whose path is stored in `char *GIF_OUTPUT` 
