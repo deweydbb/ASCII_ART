@@ -38,4 +38,7 @@ void writeGif(Gif *gif);
 // to the correct width, height, file path, color palette etc
 ge_GIF *getGifOut(Image *image);
 
+// delete frames created in ../imageOutput/
+void cleanUpFrames(Gif *gif);
+
 #endif //ASCII_ART_IMAGE_H

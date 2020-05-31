@@ -173,3 +173,20 @@ ge_GIF *getGifOut(Image *image) {
 
     return gifOut;
 }
+
+// delete frames created in ../imageOutput/
+void cleanUpFrames(Gif *gif) {
+    char ch[30];
+    int status;
+    // loop through all the frames in the gif
+    for (int frameNum = 0; frameNum < gif->numFrames; frameNum++) {
+        // set the file path to the correct frame
+        sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
+        // remove frame
+        status = remove(ch);
+        // notify if removal was unsuccessful
+        if (status != 0) {
+            printf("failed to delete: %s\n", ch);
+        }
+    }
+}
