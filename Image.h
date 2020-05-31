@@ -1,5 +1,5 @@
 #include "font.h"
-
+#include "gifenc.h"
 
 #ifndef ASCII_ART_IMAGE_H
 #define ASCII_ART_IMAGE_H
@@ -32,5 +32,7 @@ typedef struct {
 Gif *getGif(const char *filename);
 
 void writeGif(Gif *gif);
+
+ge_GIF *getGifOut(Image *image);
 
 #endif //ASCII_ART_IMAGE_H
