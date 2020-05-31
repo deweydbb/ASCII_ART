@@ -7,9 +7,11 @@ const int NUM_BRIGHT_ROW = 4;
 const int NUM_BRIGHT_COL = 2;
 const int SEC_LEN = 1;
 
-char *IMG = "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/images/testGif2.gif";
+char *IMG = "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/images/testGif5.gif";
 char *FONT_FILE = "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/fontInfo.txt";
-char *OUTPUT = "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/result.txt";
+char *TEXT_OUTPUT = "D:/System Folders/Desktop/UT/Summer 2020/ASCII_ART/result.txt";
+char *GIF_OUTPUT = "../output.gif";
+char *IMG_OUTPUT = "../results.jpg";
 
 // given a file path and mode, opens up a file
 // and returns a pointer to the file
@@ -28,7 +30,7 @@ FILE *openFile(char *path, char *mode) {
 void handleImage(Character *chars, Font font, Image *image, int fileNum) {
     printf("image width: %d, height: %d\n", image->width, image->height);
 
-    FILE *result = openFile(OUTPUT, "w");
+    FILE *result = openFile(TEXT_OUTPUT, "w");
 
     int numCellsPerRow = image->height / (SEC_LEN * NUM_BRIGHT_ROW);
     int numCellsPerCol = image->width / (SEC_LEN * NUM_BRIGHT_COL);
@@ -110,7 +112,7 @@ int main() {
             free(image->pix);
             free(image);
 
-            ge_add_frame(gifOut, gif->delay / 2);
+            ge_add_frame(gifOut, gif->delay / gif->numFrames);
         }
 
         free(gif);
