@@ -13,7 +13,7 @@ const int NUM_BRIGHT_COL = 2;
 // will be converted to one character.
 const int SEC_LEN = 1;
 
-char *IMG = "../images/testGif5.gif";
+char *IMG = "../images/testGif2.gif";
 char *FONT_FILE = "../fontInfo.txt";
 char *TEXT_OUTPUT = "../result.txt";
 char *GIF_OUTPUT = "../output.gif";
@@ -74,6 +74,65 @@ void handleImage(Character *chars, Font font, Image *image, int frameNum) {
     createJpgOfResult(resultChars, chars, font, numCellsPerRow, numCellsPerCol, frameNum);
 }
 
+void handleGif(Gif *gifIn, Character *chars, Font font) {
+    // loop through each frame in the gifIn and convert it to ascii art
+    for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
+        char ch[30];
+        sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
+
+        Image *image = getImage(ch);
+        handleImage(chars, font, image, frameNum);
+    }
+
+    // the width and height stored in gifIn in not necessarily the same as
+    // the width and height of the ascii images, so gifOut must be initialized
+    // after the first frame is loaded in.
+    ge_GIF *gifOut = NULL;
+
+    // loop through all frames in gif that have been converted to ascii art
+    for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
+        char ch[30];
+        sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
+        Image *image = getImage(ch);
+        // setup gifOut properties
+        if (gifOut == NULL) {
+            gifOut = getGifOut(image);
+        }
+
+        // loop through pixels in image. Because ascii art is either black or white
+        // the 2 colors can be represented by 1 bit (0 or 1). 0 represents black
+        // 1 represents white
+        for (int row = 0; row < image->height; row++) {
+            for (int col = 0; col < image->width; col++) {
+                int index = row * image->width + col;
+                // get value of pixel in ascii art. Should always be 0 or 255
+                int val = image->pix[index];
+
+                if (val == 0) {
+                    // mark pixel in gifOut frame as black
+                    gifOut->frame[index] = 0;
+                } else {
+                    // mark pixel in gifOut frame as white
+                    gifOut->frame[index] = 1;
+                }
+            }
+        }
+
+        // free up image memory as it is no longer needed
+        free(image->pix);
+        free(image);
+        // add frame to gifOut with appropriate delay
+        ge_add_frame(gifOut, gifIn->delay / gifIn->numFrames);
+    }
+
+    // delete frames created in ../imageOutput/
+    cleanUpFrames(gifIn);
+
+    // free up gifIn
+    free(gifIn);
+    // write gif to file and clean up
+    ge_close_gif(gifOut);
+}
 
 int main() {
     FILE *fontInfo = openFile(FONT_FILE, "r");
@@ -90,60 +149,7 @@ int main() {
         // then each jpg will be converted to ascii art
         writeGif(gifIn);
 
-        // loop through each frame in the gifIn and convert it to ascii art
-        for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
-            char ch[30];
-            sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
-
-            Image *image = getImage(ch);
-            handleImage(chars, font, image, frameNum);
-        }
-
-        // the width and height stored in gifIn in not necessarily the same as
-        // the width and height of the ascii images, so gifOut must be initialized
-        // after the first frame is loaded in.
-        ge_GIF *gifOut = NULL;
-
-        // loop through all frames in gif that have been converted to ascii art
-        for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
-            char ch[30];
-            sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
-            Image *image = getImage(ch);
-            // setup gifOut properties
-            if (gifOut == NULL) {
-                gifOut = getGifOut(image);
-            }
-
-            // loop through pixels in image. Because ascii art is either black or white
-            // the 2 colors can be represented by 1 bit (0 or 1). 0 represents black
-            // 1 represents white
-            for (int row = 0; row < image->height; row++) {
-                for (int col = 0; col < image->width; col++) {
-                    int index = row * image->width + col;
-                    // get value of pixel in ascii art. Should always be 0 or 255
-                    int val = image->pix[index];
-
-                    if (val == 0) {
-                        // mark pixel in gifOut frame as black
-                        gifOut->frame[index] = 0;
-                    } else {
-                        // mark pixel in gifOut frame as white
-                        gifOut->frame[index] = 1;
-                    }
-                }
-            }
-
-            // free up image memory as it is no longer needed
-            free(image->pix);
-            free(image);
-            // add frame to gifOut with appropriate delay
-            ge_add_frame(gifOut, gifIn->delay / gifIn->numFrames);
-        }
-
-        // free up gifIn
-        free(gifIn);
-        // write gif to file and clean up
-        ge_close_gif(gifOut);
+        handleGif(gifIn, chars, font);
     } else {
         // input is an image
         Image *image = getImage(IMG);
