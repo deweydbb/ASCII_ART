@@ -16,10 +16,9 @@ typedef struct {
 // based on the given path
 Image *getImage(char *path);
 
-// frees up memory associated with an image struct
-void freeImage(Image *image);
-
-void createJpgOfResult(unsigned char *charResult, Character *chars, Font font, int charPerRow, int charPerCol, int fileNum);
+// given the order of characters in the ascii art, writes a jpg of the ascii art to IMG_OUTPUT
+// if the frameNum is -1. (meaning image is stand alone and not part of gif)
+void createJpgOfResult(unsigned char *charResult, Character *chars, Font font, int charPerRow, int charPerCol, int frameNum);
 
 typedef struct {
     int width;
@@ -29,10 +28,14 @@ typedef struct {
     unsigned char *pix;
 } Gif;
 
+// loads in gif from file
 Gif *getGif(const char *filename);
 
+// write all frames of a gif to ../imageOutput/frame_0x.jpg
 void writeGif(Gif *gif);
 
+// given an image initializes a ge_GIF struct
+// to the correct width, height, file path, color palette etc
 ge_GIF *getGifOut(Image *image);
 
 #endif //ASCII_ART_IMAGE_H

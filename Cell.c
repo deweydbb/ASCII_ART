@@ -4,6 +4,7 @@
 extern const int NUM_BRIGHT_ROW;
 extern const int NUM_BRIGHT_COL;
 
+// helper method for getCell
 // given a cell and a font, creates the brightness array of a cell
 // given the number of rows and columns in the brightness array
 void setBrightness(Cell *cell, int rows, int cols) {
@@ -83,6 +84,7 @@ Cell getCell(Image *image, int cellRow, int cellCol, int secLen) {
     return c;
 }
 
+// helper method for getBestChar
 // compares a cell to a character and returns a double representing
 // how close of a match the cell and character are. 0 is a perfect
 // match, the larger the number the less similar they are.
@@ -126,6 +128,7 @@ Character getBestChar(Cell cell, Character *chars, Font font) {
 }
 
 // prints the brightness array of a cell
+// used for debugging
 void printCellBrightness(Cell cell) {
     for (int r = 0; r < NUM_BRIGHT_ROW; r++) {
         for (int c = 0; c < NUM_BRIGHT_COL; c++) {
