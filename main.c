@@ -13,7 +13,7 @@ const int NUM_BRIGHT_COL = 2;
 // will be converted to one character.
 const int SEC_LEN = 1;
 
-char *IMG = "../images/testGif2.gif";
+char *IMG = "../images/bobRoss1.jpg";
 char *FONT_FILE = "../fontInfo.txt";
 char *TEXT_OUTPUT = "../result.txt";
 char *GIF_OUTPUT = "../output.gif";
@@ -36,10 +36,10 @@ FILE *openFile(char *path, char *mode) {
 // takes in an image and converts it to ascii art. Writes output to both
 // TEXT_OUTPUT and IMG_OUTPUT. (if gif writes img to ../imageOutput/frames_0x.jpg
 //_0x is based on the frame num.
-void handleImage(Character *chars, Font font, Image *image, int frameNum) {
+Image *handleImage(Character *chars, Font font, Image *image) {
     printf("image width: %d, height: %d\n", image->width, image->height);
 
-    FILE *TEXT_FILE = openFile(TEXT_OUTPUT, "w");
+    //FILE *TEXT_FILE = openFile(TEXT_OUTPUT, "w");
 
     int numCellsPerRow = image->height / (SEC_LEN * NUM_BRIGHT_ROW);
     int numCellsPerCol = image->width / (SEC_LEN * NUM_BRIGHT_COL);
@@ -56,7 +56,7 @@ void handleImage(Character *chars, Font font, Image *image, int frameNum) {
             // get best char to represent current cell
             Character bestChar = getBestChar(c, chars, font);
             // write best char to text file
-            fprintf(TEXT_FILE, "%c", bestChar.symbol);
+            //fprintf(TEXT_FILE, "%c", bestChar.symbol);
             resultChars[resultCharIndex] = bestChar.symbol;
             resultCharIndex++;
             // free up cell because we no longer need any of its values
@@ -64,44 +64,36 @@ void handleImage(Character *chars, Font font, Image *image, int frameNum) {
             free(c.bright_array);
         }
 
-        fprintf(TEXT_FILE, "\n");
+        //fprintf(TEXT_FILE, "\n");
     }
 
-    fclose(TEXT_FILE);
-    free(image->pix);
-    free(image);
-    // write jpg of ascii art
-    createJpgOfResult(resultChars, chars, font, numCellsPerRow, numCellsPerCol, frameNum);
+    //fclose(TEXT_FILE);
+
+    return createPixelResult(resultChars, chars, font, numCellsPerRow, numCellsPerCol);
 }
 
 void handleGif(Gif *gifIn, Character *chars, Font font) {
-    // loop through each frame in the gifIn and convert it to ascii art
-    for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
-        char ch[30];
-        sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
+    Image *imgPointer[gifIn->numFrames];
 
-        Image *image = getImage(ch);
-        handleImage(chars, font, image, frameNum);
+    for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
+        Image *inputImg = malloc(sizeof(Image));
+        inputImg->width = gifIn->width;
+        inputImg->height = gifIn->height;
+        inputImg->pix = gifIn->pix + gifIn->width * gifIn->height * frameNum;
+        printf("input width: %d input height %d\n", inputImg->width, inputImg->height);
+
+        imgPointer[frameNum] = handleImage(chars, font, inputImg);
     }
 
-    // the width and height stored in gifIn in not necessarily the same as
-    // the width and height of the ascii images, so gifOut must be initialized
-    // after the first frame is loaded in.
-    ge_GIF *gifOut = NULL;
+    free(gifIn->pix);
 
-    // loop through all frames in gif that have been converted to ascii art
+    ge_GIF *gifOut = getGifOut(imgPointer[0]);
+
+    printf("output width: %d output height %d\n", imgPointer[0]->width, imgPointer[0]->height);
+
     for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
-        char ch[30];
-        sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
-        Image *image = getImage(ch);
-        // setup gifOut properties
-        if (gifOut == NULL) {
-            gifOut = getGifOut(image);
-        }
+        Image *image = imgPointer[frameNum];
 
-        // loop through pixels in image. Because ascii art is either black or white
-        // the 2 colors can be represented by 1 bit (0 or 1). 0 represents black
-        // 1 represents white
         for (int row = 0; row < image->height; row++) {
             for (int col = 0; col < image->width; col++) {
                 int index = row * image->width + col;
@@ -117,16 +109,10 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
                 }
             }
         }
-
-        // free up image memory as it is no longer needed
-        free(image->pix);
-        free(image);
         // add frame to gifOut with appropriate delay
         ge_add_frame(gifOut, gifIn->delay / gifIn->numFrames);
     }
 
-    // delete frames created in ../imageOutput/
-    cleanUpFrames(gifIn);
 
     // free up gifIn
     free(gifIn);
@@ -145,17 +131,16 @@ int main() {
     if (strstr(IMG, ".gif")) {
         // loads gifIn into memory
         Gif *gifIn = getGif(IMG);
-        // write out each frame of gifIn to ../imageOutput/frame_0x.jpg
-        // then each jpg will be converted to ascii art
-        writeGif(gifIn);
-
+        // converts each frame to image and then combines each frame into gif
         handleGif(gifIn, chars, font);
     } else {
         // input is an image
         Image *image = getImage(IMG);
         // -1 for frame number signals that this image is not part of gif
         // and the regular IMG_OUTPUT path should be used
-        handleImage(chars, font, image, -1);
+        Image *output = handleImage(chars, font, image);
+        // write to file and free up image
+        createJpgOfResult(output, -1);
     }
 
     return 0;
