@@ -13,7 +13,7 @@ const int NUM_BRIGHT_COL = 2;
 // will be converted to one character.
 const int SEC_LEN = 1;
 
-char *IMG = "../images/bobRoss1.jpg";
+char *IMG = "../images/testImage14.jpg";
 char *FONT_FILE = "../fontInfo.txt";
 char *TEXT_OUTPUT = "../result.txt";
 char *GIF_OUTPUT = "../output.gif";
@@ -39,7 +39,7 @@ FILE *openFile(char *path, char *mode) {
 Image *handleImage(Character *chars, Font font, Image *image) {
     printf("image width: %d, height: %d\n", image->width, image->height);
 
-    //FILE *TEXT_FILE = openFile(TEXT_OUTPUT, "w");
+    FILE *TEXT_FILE = openFile(TEXT_OUTPUT, "w");
 
     int numCellsPerRow = image->height / (SEC_LEN * NUM_BRIGHT_ROW);
     int numCellsPerCol = image->width / (SEC_LEN * NUM_BRIGHT_COL);
@@ -56,7 +56,7 @@ Image *handleImage(Character *chars, Font font, Image *image) {
             // get best char to represent current cell
             Character bestChar = getBestChar(c, chars, font);
             // write best char to text file
-            //fprintf(TEXT_FILE, "%c", bestChar.symbol);
+            fprintf(TEXT_FILE, "%c", bestChar.symbol);
             resultChars[resultCharIndex] = bestChar.symbol;
             resultCharIndex++;
             // free up cell because we no longer need any of its values
@@ -64,17 +64,19 @@ Image *handleImage(Character *chars, Font font, Image *image) {
             free(c.bright_array);
         }
 
-        //fprintf(TEXT_FILE, "\n");
+        fprintf(TEXT_FILE, "\n");
     }
 
-    //fclose(TEXT_FILE);
+    fclose(TEXT_FILE);
 
     return createPixelResult(resultChars, chars, font, numCellsPerRow, numCellsPerCol);
 }
 
 void handleGif(Gif *gifIn, Character *chars, Font font) {
+    // stores ascii version of frames for gif
     Image *imgPointer[gifIn->numFrames];
 
+    // loop through each frame from input gif and covert it to ascii art
     for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
         Image *inputImg = malloc(sizeof(Image));
         inputImg->width = gifIn->width;
@@ -94,6 +96,7 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
     for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
         Image *image = imgPointer[frameNum];
 
+        // loop through every pixel in frame
         for (int row = 0; row < image->height; row++) {
             for (int col = 0; col < image->width; col++) {
                 int index = row * image->width + col;
