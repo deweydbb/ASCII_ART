@@ -75,20 +75,16 @@ Image *createPixelResult(const unsigned char *charResult, Character *chars, Font
 
 // given the order of characters in the ascii art, writes a jpg of the ascii art to IMG_OUTPUT
 // if the frameNum is -1. (meaning image is stand alone and not part of gif)
-void createJpgOfResult(unsigned char *charResult, Character *chars, Font font, int charPerRow, int charPerCol, int frameNum) {
+void createJpgOfResult(Image *img, int frameNum) {
     // get image representation of ascii art
-    Image *img = createPixelResult(charResult, chars, font, charPerRow, charPerCol);
 
-    char ch[80];
-    // determine if image is part of a gif or is standalone
+    char ch[30];
     if (frameNum == -1) {
-        // the image is standalone and should be written to stand
-        // IMG_OUTPUT specified at the top of main
         sprintf(ch, "%s", IMG_OUTPUT);
     } else {
-        // image is part of gif
         sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
     }
+
     // write image to specified file path. comp of 1 means image is black and white
     stbi_write_jpg(ch, img->width, img->height, 1, img->pix, img->width);
 
@@ -146,16 +142,6 @@ Gif *getGif(const char *filename) {
     return result;
 }
 
-// write all of the frames of a gif to ../imageOutput/frame_0x.jpg
-// code adapted from: https://github.com/nothings/stb/issues/915#issuecomment-604217649
-void writeGif(Gif *gif) {
-    char ch[30];
-    for (int frameNum = 0; frameNum < gif->numFrames; frameNum++) {
-        sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
-        stbi_write_jpg(ch, gif->width, gif->height, 1, gif->pix + gif->width * gif->height * frameNum, 0);
-    }
-}
-
 // given an image initializes a ge_GIF struct
 // to the correct width, height, file path, color palette etc
 ge_GIF *getGifOut(Image *image) {
@@ -167,26 +153,9 @@ ge_GIF *getGifOut(Image *image) {
                     0x00, 0x00, 0x00,   // 0 -> black
                     0xFF, 0xFF, 0xFF    // 1 -> white
             },
-            1,                      // palette depth == log2(# of colors)
-            0                       // infinite loop
+            1,                          // palette depth == log2(# of colors)
+            0                            // infinite loop
     );
 
     return gifOut;
-}
-
-// delete frames created in ../imageOutput/
-void cleanUpFrames(Gif *gif) {
-    char ch[30];
-    int status;
-    // loop through all the frames in the gif
-    for (int frameNum = 0; frameNum < gif->numFrames; frameNum++) {
-        // set the file path to the correct frame
-        sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
-        // remove frame
-        status = remove(ch);
-        // notify if removal was unsuccessful
-        if (status != 0) {
-            printf("failed to delete: %s\n", ch);
-        }
-    }
 }
