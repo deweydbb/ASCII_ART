@@ -48,3 +48,4 @@ Each cell of the image that will be converted into a single character is broken 
 For example if SEC_LEN is 2, the section will be made up of a square of 4 pixels (since 2 
 squared is 4). This mean that each cell of the image that is 4 pixels wide and 8 pixels wide
 will be converted to one character.
+
