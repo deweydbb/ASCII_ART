@@ -14,8 +14,8 @@ const int NUM_BRIGHT_COL = 2;
 // will be converted to one character.
 const int SEC_LEN = 1;
 
-char *IMG;
 char FONT_FILE[16] = "../fontInfo.txt";
+char *IMG = NULL;
 char *TEXT_OUTPUT = NULL;
 char *GIF_OUTPUT = NULL;
 char *IMG_OUTPUT = NULL;
@@ -42,10 +42,12 @@ Image *handleImage(Character *chars, Font font, Image *image) {
             Cell c = getCell(image, row, col, SEC_LEN);
             // get best char to represent current cell
             Character bestChar = getBestChar(c, chars, font);
-            // write best char to text file
             if (TEXT_FILE != NULL) {
+                // write best char to text file
+
                 fprintf(TEXT_FILE, "%c", bestChar.symbol);
             }
+
             resultChars[resultCharIndex] = bestChar.symbol;
             resultCharIndex++;
             // free up cell because we no longer need any of its values
@@ -57,6 +59,7 @@ Image *handleImage(Character *chars, Font font, Image *image) {
             fprintf(TEXT_FILE, "\n");
         }
     }
+
     if (TEXT_FILE != NULL) {
         fclose(TEXT_FILE);
     }
@@ -64,6 +67,8 @@ Image *handleImage(Character *chars, Font font, Image *image) {
     return createPixelResult(resultChars, chars, font, numCellsPerRow, numCellsPerCol);
 }
 
+// converts a gif to separate ascii art images and then rejoins images as
+// frames to create a gif of ascii art
 void handleGif(Gif *gifIn, Character *chars, Font font) {
     // stores ascii version of frames for gif
     Image *imgPointer[gifIn->numFrames];
@@ -107,7 +112,6 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
         ge_add_frame(gifOut, gifIn->delay / gifIn->numFrames);
     }
 
-
     // free up gifIn
     free(gifIn);
     // write gif to file and clean up
@@ -115,8 +119,8 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
 }
 
 int main() {
+    // get input and output paths from user
     setInputAndOutputPath();
-    char *imgPath = IMG;
 
     FILE *fontInfo = openFile(FONT_FILE, "r");
     Font font = loadFont(fontInfo);
@@ -125,19 +129,19 @@ int main() {
     fclose(fontInfo);
 
     // determine if input file is a GIF or a regular photo
-    if (strstr(imgPath, ".gif")) {
+    if (strstr(IMG, ".gif")) {
         // loads gifIn into memory
         Gif *gifIn = getGif(IMG);
         // converts each frame to image and then combines each frame into gif
         handleGif(gifIn, chars, font);
     } else {
         // input is an image
-        Image *image = getImage(imgPath);
+        Image *image = getImage(IMG);
         // -1 for frame number signals that this image is not part of gif
         // and the regular IMG_OUTPUT path should be used
         Image *output = handleImage(chars, font, image);
-        // write to file and free up image
         if (IMG_OUTPUT != NULL) {
+            // create jpg of ascii art
             createJpgOfResult(output);
         }
     }
