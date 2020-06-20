@@ -75,7 +75,6 @@ Image *createPixelResult(const unsigned char *charResult, Character *chars, Font
 }
 
 // given the order of characters in the ascii art, writes a jpg of the ascii art to IMG_OUTPUT
-// if the frameNum is -1. (meaning image is stand alone and not part of gif)
 void createJpgOfResult(Image *img) {
     // write image to specified file path. comp of 1 means image is black and white
     stbi_write_jpg(IMG_OUTPUT, img->width, img->height, 1, img->pix, img->width);

@@ -12,7 +12,8 @@ extern char *IMG_OUTPUT;
 
 // given a file path and mode, opens up a file
 // and returns a pointer to the file
-// exits program if fails to load file
+// if path is null returns null
+// exits program if fails to load file with non null path
 FILE *openFile(char *path, char *mode) {
     if (path == NULL) {
         return NULL;
@@ -28,24 +29,26 @@ FILE *openFile(char *path, char *mode) {
     return f;
 }
 
+// set the global variable IMG which stores the path of the input image
+// uses gui to have user select file they want to convert
 void setInputPath() {
-    char const *filterPatterns[8] = {"*.jpg", "*.png", "*.gif", "*.tga", "*.bmp", "*.psd", "*.hdr", "*.pic"};
-    char *inputPath = NULL;
+    char const *filterPatterns[8] = {"*.jpg", "*.png", "*.gif", "*.tga",
+                                     "*.bmp", "*.psd", "*.hdr", "*.pic"};
 
-    while (inputPath == NULL) {
-        inputPath = tinyfd_openFileDialog(
-                "Please pick an image to convert",
-                "",
-                8,
-                filterPatterns,
-                NULL,
-                0);
+    char *inputPath = tinyfd_openFileDialog(
+            "Please pick an image to convert",
+            "",
+            8,
+            filterPatterns,
+            NULL,
+            0);
 
-        if (inputPath == NULL) {
-            tinyfd_messageBox("Error", "Please select an image or gif to convert into ascii art",
-                    "ok", "info", 0);
-        }
+    if (inputPath == NULL) {
+        tinyfd_messageBox("Error", "You did not select an image. Exiting program.",
+                          "ok", "info", 0);
+        exit(0);
     }
+
 
     IMG = strdup(inputPath);
 }
@@ -63,7 +66,10 @@ int isGif(char *path) {
     return 1;
 }
 
+// sets appropriate global variable for output path
+// asks user where they want to save the output
 void setOutputPath(int isInputGif, int isOutputText) {
+    // setup filter patterns based on input file type
     char *filterPatterns[2] = {"*.txt", "*.text"};
     int numPatters = 2;
     if (isInputGif) {
@@ -74,21 +80,18 @@ void setOutputPath(int isInputGif, int isOutputText) {
         filterPatterns[0] = "*.jpg";
     }
 
-    char *outputPath = NULL;
-    while (outputPath == NULL) {
-        outputPath = tinyfd_saveFileDialog(
-                "Choose where the ascii art will be saved",
-                "output",
-                numPatters,
-                (const char *const *) filterPatterns,
-                NULL);
+    char *outputPath = tinyfd_saveFileDialog(
+            "Choose where the ascii art will be saved",
+            "output",
+            numPatters,
+            (const char *const *) filterPatterns,
+            NULL);
 
-        if (outputPath == NULL) {
-            tinyfd_messageBox("Error", "Please select where to save the ascii art",
-                              "ok", "info", 0);
-        }
+    if (outputPath == NULL) {
+        tinyfd_messageBox("Error", "You did not select a file. Exiting program.",
+                          "ok", "info", 0);
     }
-
+    // set correct global variable based on input file type
     if (isOutputText) {
         TEXT_OUTPUT = strdup(outputPath);
     } else if (isInputGif) {
@@ -98,15 +101,18 @@ void setOutputPath(int isInputGif, int isOutputText) {
     }
 }
 
+// get input and output paths from user
 void setInputAndOutputPath() {
     setInputPath();
 
     int isInputGif = isGif(IMG);
     int isOutputText = 0;
+    // if the user wants to convert and image determine
+    // if they want the output to be a .txt file or a jpg
     if (!isInputGif) {
         isOutputText = tinyfd_messageBox(
                 "Question",
-                "Do you want the output to be a text file?",
+                "Do you want the output to be a .txt file? (No for .jpg)",
                 "yesno",
                 "question",
                 1);
