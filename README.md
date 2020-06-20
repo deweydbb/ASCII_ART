@@ -1,20 +1,21 @@
 # ASCII_ART
 C program to convert images and gifs into ascii art
 
-##How To Use
-Each cell of the image that will be converted into a single character is broken up into
-8 sections. (2 sections wide, 4 sections tall) SEC_LEN specifies the length of each section. 
-For example if SEC_LEN is 2, the section will be made up of a square of 4 pixels (since 2 
-squared is 4). This mean that each cell of the image that is 4 pixels wide and 8 pixels wide
-will be converted to one character.
+##Accepted Input
+* JPG
+* PNG
+* GIF
+* TGA
+* BMP,
+* PSD
+* HDR
+* PIC
 
-    const int SEC_LEN = 2;
-
-    char *IMG = "path to image (or gif) to convert";
-    char *FONT_FILE = "path to font info file";
-    char *OUTPUT = "path to text file output";
-    char *GIF_OUTPUT = "path to gif file output";
-    char *IMG_OUTPUT = "path to img file output";
+## Currently supported Output
+* txt
+* text
+* jpg
+* gif
     
 ##How To Change Font
 To change what font the program uses, you need to create a new fontInfo file and update the
@@ -42,6 +43,9 @@ as a delimiter, I used the equal sign to represent the space character because I
 The current font used in the project is Consolas Regular simply because it is the default
 font for windows notepad. 
 
-## GIFS
-Change the `char *IMG` variable to the path of the GIF you want to convert. The program will write to
-whatever the file whose path is stored in `char *GIF_OUTPUT` 
+Each cell of the image that will be converted into a single character is broken up into
+8 sections. (2 sections wide, 4 sections tall) SEC_LEN specifies the length of each section. 
+For example if SEC_LEN is 2, the section will be made up of a square of 4 pixels (since 2 
+squared is 4). This mean that each cell of the image that is 4 pixels wide and 8 pixels wide
+will be converted to one character.
+
