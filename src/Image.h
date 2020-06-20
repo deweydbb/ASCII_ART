@@ -1,4 +1,4 @@
-#include "font.h"
+#include "Font.h"
 #include "../libs/gifenc.h"
 
 #ifndef ASCII_ART_IMAGE_H

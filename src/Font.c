@@ -1,5 +1,5 @@
-#include "font.h"
-#include "fontInfo.h"
+#include "Font.h"
+#include "FontInfo.h"
 
 extern const int NUM_BRIGHT_ROW;
 extern const int NUM_BRIGHT_COL;
