@@ -67,10 +67,6 @@ Character loadNextChar(Font font, int charNum) {
 
     Character c;
     c.symbol = fontInfo[startIndex];
-    // equals sign is special char representing space.
-    if (c.symbol == '=') {
-        c.symbol = ' ';
-    }
 
     c.val_array = (short *) malloc(len * sizeof(short));
     if (c.val_array == NULL) {

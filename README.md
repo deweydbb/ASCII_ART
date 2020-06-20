@@ -1,7 +1,7 @@
 # ASCII_ART
 C program to convert images and gifs into ascii art
 
-##Accepted Input
+## Accepted Input
 * JPG
 * PNG
 * GIF
@@ -16,20 +16,28 @@ C program to convert images and gifs into ascii art
 * text
 * jpg
 * gif
-    
-##How To Change Font
-To change what font the program uses, you need to create a new fontInfo file and update the
-value stored in:
 
-     char *FONT_FILE = "path to font info file";
+## Examples
+![](examples/obama.jpg)
+![](examples/peace.gif)
+![](examples/portait.jpg)
+![](examples/stick_fight.gif)
+
+## How it works
+Essentially the program breaks up image into cells that will be represented by a single character. Both cells and characters are broken up into further sections. Each of these sections within the cell/character have their average brightness calculated. Then the brightness of sections are stored relative to the average brigthness of the cell/character. So if the value of a seciton is 1.0, the brightness of that section is the same as the rest of the cell/character. Then by comparing the sections of a cell to a character, the best character to best represent the cell can be chosen.
+
+The program essentially compares the relative change in brightness of the cell to the relative change in brightness of the character to find the best character. This means that images that hard edges turn out better. Images with busy backgrounds tend to not look as good. 
+    
+## How To Change Font
     
 **The font must be monospaced.** 
 
-The format of the fontInfo text file is as follows:
+The format of the fontInfo.h file is as follows
     
     number of characters in the font
     width in pixels of the font
     height in pixels of the font
+    
     [1st character in font][width * height number of 1's or 0's, 1 represents a white pixel
     0 represents a black pixel]\n
     [2nd char][width * height 1's and 0s]\n
@@ -38,8 +46,6 @@ The format of the fontInfo text file is as follows:
     .
     [Nth char][width * height 1's and 0s]\n
     
-There is a special case for the character ' ' (space). Because white space is usually used
-as a delimiter, I used the equal sign to represent the space character because I am lazy.
 The current font used in the project is Consolas Regular simply because it is the default
 font for windows notepad. 
 
