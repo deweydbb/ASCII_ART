@@ -3,8 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-#include "stb_image.h"
-#include "stb_image_write.h"
+#include "../libs/stb_image.h"
+#include "../libs/stb_image_write.h"
 #include <stdio.h>
 
 extern char *IMG_OUTPUT;

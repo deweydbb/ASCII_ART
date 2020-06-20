@@ -2,7 +2,7 @@
 // Created by dewey on 6/16/2020.
 //
 #include <stdlib.h>
-#include "tinyfiledialogs.h"
+#include "../libs/tinyfiledialogs.h"
 #include "File.h"
 
 extern char *IMG;
