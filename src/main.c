@@ -121,11 +121,9 @@ int main() {
     // get input and output paths from user
     setInputAndOutputPath();
 
-    FILE *fontInfo = openFontFile();
-    Font font = loadFont(fontInfo);
+    Font font = loadFont();
     // stores all characters of the font, and their pixel representations
-    Character *chars = getCharArray(font, fontInfo);
-    fclose(fontInfo);
+    Character *chars = getCharArray(font);
 
     // determine if input file is a GIF or a regular photo
     if (strstr(IMG, ".gif")) {

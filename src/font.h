@@ -23,10 +23,12 @@ typedef struct {
 } Character;
 
 // returns a font struct based on a file
-Font loadFont(FILE *f);
+Font loadFont();
 
-Character *getCharArray(Font font, FILE *f);
+// gets all the characters in the font
+Character *getCharArray(Font font);
 
+// simple linear search to get pointer to character based on symbol
 Character *getCharacterFromSymbol(Character *chars, Font font, unsigned char symbol);
 
 // given a row and column returns a value between 0 and 255
