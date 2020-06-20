@@ -29,6 +29,21 @@ FILE *openFile(char *path, char *mode) {
     return f;
 }
 
+FILE *openFontFile() {
+    FILE *f = fopen("../fontInfo.txt", "r");
+
+    if (f == NULL) {
+        f = fopen("./fontInfo.txt", "r");
+    }
+
+    if (f == NULL) {
+        printf("failed to load file: %s\n", "../fontInfo.txt");
+        exit(1);
+    }
+
+    return f;
+}
+
 // set the global variable IMG which stores the path of the input image
 // uses gui to have user select file they want to convert
 void setInputPath() {

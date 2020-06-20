@@ -111,7 +111,7 @@ double compareCellToChar(Cell cell, Character ch) {
 // returns the character that is the best match for cell.
 Character getBestChar(Cell cell, Character *chars, Font font) {
     int bestIndex = 0;
-    double lowestDiff = INT_MAX;
+    double lowestDiff = 9007199254740992; // max double
 
     // loops through all of the possible characters
     for (int i = 0; i < font.numChar; i++) {

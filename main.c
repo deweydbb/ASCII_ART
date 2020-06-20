@@ -14,7 +14,6 @@ const int NUM_BRIGHT_COL = 2;
 // will be converted to one character.
 const int SEC_LEN = 1;
 
-char FONT_FILE[16] = "../fontInfo.txt";
 char *IMG = NULL;
 char *TEXT_OUTPUT = NULL;
 char *GIF_OUTPUT = NULL;
@@ -122,7 +121,7 @@ int main() {
     // get input and output paths from user
     setInputAndOutputPath();
 
-    FILE *fontInfo = openFile(FONT_FILE, "r");
+    FILE *fontInfo = openFontFile();
     Font font = loadFont(fontInfo);
     // stores all characters of the font, and their pixel representations
     Character *chars = getCharArray(font, fontInfo);

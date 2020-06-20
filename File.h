@@ -9,6 +9,8 @@
 // exits program if fails to load file
 FILE *openFile(char *path, char *mode);
 
+FILE *openFontFile();
+
 // get input and output paths from user
 void setInputAndOutputPath();
 
