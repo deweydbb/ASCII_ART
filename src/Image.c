@@ -19,7 +19,6 @@ extern char *GIF_OUTPUT;
 // returns a struct that contains an array of pixels, width and height of an image
 // in grey scale. Exits program if unable to load image.
 Image *getImage(char *path) {
-    printf("image path: %s\n", path);
     int width, height, channels;
     unsigned char *pixels = stbi_load(path, &width, &height, &channels, 1);
 

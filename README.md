@@ -24,7 +24,7 @@ C program to convert images and gifs into ascii art
 ![](examples/stick_fight.gif)
 
 ## How it works
-Essentially the program breaks up image into cells that will be represented by a single character. Both cells and characters are broken up into further sections. Each of these sections within the cell/character have their average brightness calculated. Then the brightness of sections are stored relative to the average brigthness of the cell/character. So if the value of a seciton is 1.0, the brightness of that section is the same as the rest of the cell/character. Then by comparing the sections of a cell to a character, the best character to best represent the cell can be chosen.
+Essentially the program breaks up image into cells that will be represented by a single character. Both cells and characters are broken up into further sections. Each of these sections within the cell/character have their average brightness calculated. Then the brightness of sections are stored relative to the average brightness of the cell/character. So if the value of a section is 1.0, the brightness of that section is the same as the rest of the cell/character. Then by comparing the sections of a cell to a character, the best character to best represent the cell can be chosen.
 
 The program essentially compares the relative change in brightness of the cell to the relative change in brightness of the character to find the best character. This means that images that hard edges turn out better. Images with busy backgrounds tend to not look as good. 
     

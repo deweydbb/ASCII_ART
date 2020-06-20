@@ -23,10 +23,19 @@ FILE *openFile(char *path, char *mode) {
 
     if (f == NULL) {
         printf("failed to load file: %s\n", path);
+        char *msg = NULL;
+        sprintf(msg, "failed to load file: %s", path);
+        sendPopup("Error", msg);
         exit(1);
     }
 
     return f;
+}
+
+// given a title and a message, sends a
+// a popup window with given info
+void sendPopup(char *title, char *msg) {
+    tinyfd_messageBox(title, msg,"ok", "info", 0);
 }
 
 // set the global variable IMG which stores the path of the input image

@@ -23,8 +23,6 @@ char *IMG_OUTPUT = NULL;
 // TEXT_OUTPUT and IMG_OUTPUT. (if gif writes img to ../imageOutput/frames_0x.jpg
 //_0x is based on the frame num.
 Image *handleImage(Character *chars, Font font, Image *image) {
-    printf("image width: %d, height: %d\n", image->width, image->height);
-
     FILE *TEXT_FILE = openFile(TEXT_OUTPUT, "w");
 
     int numCellsPerRow = image->height / (SEC_LEN * NUM_BRIGHT_ROW);
@@ -86,8 +84,6 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
 
     ge_GIF *gifOut = getGifOut(imgPointer[0]);
 
-    printf("output width: %d output height %d\n", imgPointer[0]->width, imgPointer[0]->height);
-
     for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
         Image *image = imgPointer[frameNum];
 
@@ -142,6 +138,8 @@ int main() {
             createJpgOfResult(output);
         }
     }
+
+    sendPopup("", "Conversion completed successfully!");
 
     return 0;
 }
