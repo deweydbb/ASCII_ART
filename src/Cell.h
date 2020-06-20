@@ -8,7 +8,7 @@ typedef struct {
     int width;
     int height;
     short *val_array;
-    double *bright_array;
+    double avgBright;
     double dx;
     double dy;
 } Cell;

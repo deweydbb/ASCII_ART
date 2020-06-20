@@ -6,8 +6,8 @@
 
 // determines the number of rows and columns of the
 // brightness array of fonts and characters
-const int NUM_BRIGHT_ROW = 2;
-const int NUM_BRIGHT_COL = 1;
+const int NUM_BRIGHT_ROW = 4;
+const int NUM_BRIGHT_COL = 2;
 // SEC_LEN specifies the length of each section.
 // For example if SEC_LEN is 2, the section will be made up of a square of 4 pixels (since 2
 // squared is 4). This mean that each cell of the image that is 4 pixels wide and 8 pixels wide
@@ -51,7 +51,6 @@ Image *handleImage(Character *chars, Font font, Image *image) {
             resultCharIndex++;
             // free up cell because we no longer need any of its values
             free(c.val_array);
-            free(c.bright_array);
         }
 
         if (TEXT_FILE != NULL) {

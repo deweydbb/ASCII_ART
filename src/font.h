@@ -19,7 +19,7 @@ typedef struct {
 typedef struct {
     char symbol;
     short *val_array;
-    double *bright_array;
+    double avgBright;
     double dx;
     double dy;
 } Character;

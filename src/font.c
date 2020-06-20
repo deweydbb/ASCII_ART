@@ -10,55 +10,6 @@ Font loadFont() {
     return font;
 }
 
-// given a character and a font, creates the brightness array of a character
-// given the number of rows and columns in the brightness array
-void setBrightnessChar(Character *ch, Font font, int rows, int cols) {
-    // number of pixels per row/column in a section of the brightness array
-    int pixPerRow = font.height / rows;
-    int pixPerCol = font.width / cols;
-    // allocates space on head
-    ch->bright_array = malloc(rows * cols * sizeof(double));
-    if (ch->bright_array == NULL) {
-        printf("malloc failed to create brightness array");
-        exit(1);
-    }
-    // represents the total of the average value of all sectors
-    int sectorSum = 0;
-    // loops through each section of the brightness array
-    for (int r = 0; r < rows; r++) {
-        for (int c = 0; c < cols; c++) {
-
-            int sum = 0;
-            // loops through all the pixels in the brightness array
-            for (int secRow = 0; secRow < pixPerRow; secRow++) {
-                for (int secCol = 0; secCol < pixPerCol; secCol++) {
-                    // calculates the corresponding index of the pixel in the pixel array
-                    int index = (r * pixPerRow + secRow) * font.width + (c * pixPerCol + secCol);
-                    sum += ch->val_array[index];
-                }
-            }
-
-            sectorSum += sum / (pixPerCol * pixPerRow);
-
-            int indexBright = r * cols + c;
-            ch->bright_array[indexBright] = sum / (pixPerCol * pixPerRow);
-        }
-    }
-    // average value of each sector
-    double avg = (double) sectorSum / (rows * cols);
-
-    for (int r = 0; r < rows; r++) {
-        for (int c = 0; c < cols; c++) {
-            int index = r * cols + c;
-            // makes brightness array value relative to other values in the
-            // brightness array. 1.0 means the sector is the average of all other sectors
-            // any values less than 1.0 means the sector is darker than average
-            // greater than 1.0 means it is lighter than average
-            ch->bright_array[index] /= avg;
-        }
-    }
-}
-
 double getHorSlope(Character *ch, Font font, int row) {
     double avgSlope = 0;
 
@@ -105,6 +56,15 @@ void setSlopes(Character *ch, Font font) {
     ch->dy = vertSlope;
 }
 
+void setAvgBright(Character *ch, Font font) {
+    double totalBright = 0;
+    for (int i = 0; i < font.width * font.height; i++) {
+        totalBright += ch->val_array[i];
+    }
+
+    ch->avgBright = totalBright / (font.width * font.height);
+}
+
 // loads the next character from fontInfo.h
 Character loadNextChar(Font font, int charNum) {
     // extra two, 1 for symbol at beginning of line, one for newline char at end of string
@@ -136,8 +96,8 @@ Character loadNextChar(Font font, int charNum) {
         }
     }
 
-    setBrightnessChar(&c, font, NUM_BRIGHT_ROW, NUM_BRIGHT_COL);
     setSlopes(&c, font);
+    setAvgBright(&c, font);
 
     return c;
 }
@@ -187,19 +147,5 @@ void printChar(Character ch, Font f) {
         printf("\n");
     }
     printf("\n");
-    // prints brightness array
-    printCharBrightness(ch);
 }
 
-// prints just the brightness array of a character
-void printCharBrightness(Character ch) {
-    // loops through brightness array
-    for (int r = 0; r < NUM_BRIGHT_ROW; r++) {
-        for (int c = 0; c < NUM_BRIGHT_COL; c++) {
-            int index = r * NUM_BRIGHT_COL + c;
-            printf("%f ", ch.bright_array[index]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}

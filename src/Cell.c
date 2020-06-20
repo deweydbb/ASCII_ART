@@ -4,55 +4,6 @@
 extern const int NUM_BRIGHT_ROW;
 extern const int NUM_BRIGHT_COL;
 
-// helper method for getCell
-// given a cell and a font, creates the brightness array of a cell
-// given the number of rows and columns in the brightness array
-void setBrightness(Cell *cell, int rows, int cols) {
-    int pixPerRow = cell->height / rows;
-    int pixPerCol = cell->width / cols;
-    // allocates space on head for brightness array
-    cell->bright_array = malloc(rows * cols * sizeof(double));
-    if (cell->bright_array == NULL) {
-        printf("malloc failed to create brightness array");
-        exit(1);
-    }
-    // represents the total of the average value of all sectors
-    int sectorSum = 0;
-    // loops through each section of the brightness array
-    for (int r = 0; r < rows; r++) {
-        for (int c = 0; c < cols; c++) {
-
-            int sum = 0;
-            // loops through all the pixels in the brightness array
-            for (int secRow = 0; secRow < pixPerRow; secRow++) {
-                for (int secCol = 0; secCol < pixPerCol; secCol++) {
-                    // calculates the corresponding index of the pixel in the pixel array
-                    int index = (r * pixPerRow + secRow) * cell->width + (c * pixPerCol + secCol);
-                    sum += cell->val_array[index];
-                }
-            }
-
-            sectorSum += sum / (pixPerCol * pixPerRow);
-
-            int indexBright = r * cols + c;
-            cell->bright_array[indexBright] = sum / (pixPerCol * pixPerRow);
-        }
-    }
-    // average value of each sector
-    double avg = (double) sectorSum / (rows * cols);
-
-    for (int r = 0; r < rows; r++) {
-        for (int c = 0; c < cols; c++) {
-            int index = r * cols + c;
-            // makes brightness array value relative to other values in the
-            // brightness array. 1.0 means the sector is the average of all other sectors
-            // any values less than 1.0 means the sector is darker than average
-            // greater than 1.0 means it is lighter than average
-            cell->bright_array[index] /= avg;
-        }
-    }
-}
-
 double getHorSlopeCell(Cell *cell, int row) {
     double avgSlope = 0;
 
@@ -99,6 +50,17 @@ void setSlopesCell(Cell *cell) {
     cell->dy = vertSlope;
 }
 
+void setAvgBrightCell(Cell *cell) {
+    double totalBright = 0;
+    int numPix = cell->width * cell->height;
+
+    for (int i = 0; i < numPix; i++) {
+        totalBright += cell->val_array[i];
+    }
+
+    cell->avgBright = totalBright / numPix;
+}
+
 // returns a cell that represents the cell at a given row and column of an image
 Cell getCell(Image *image, int cellRow, int cellCol, int secLen) {
     int startRow = cellRow * NUM_BRIGHT_ROW * secLen;
@@ -125,10 +87,18 @@ Cell getCell(Image *image, int cellRow, int cellCol, int secLen) {
         }
     }
     // sets the brightness array of the cell
-    setBrightness(&c, NUM_BRIGHT_ROW, NUM_BRIGHT_COL);
     setSlopesCell(&c);
+    setAvgBrightCell(&c);
 
     return c;
+}
+
+double makePositive(double input) {
+    if (input < 0) {
+        return input * -1;
+    }
+
+    return input;
 }
 
 // helper method for getBestChar
@@ -136,35 +106,14 @@ Cell getCell(Image *image, int cellRow, int cellCol, int secLen) {
 // how close of a match the cell and character are. 0 is a perfect
 // match, the larger the number the less similar they are.
 double compareCellToChar(Cell cell, Character ch) {
-//    double totalDiff = 0;
-//
-//    // loops through brightness array of cell and character
-//    for (int row = 0; row < NUM_BRIGHT_ROW - 1; row++) {
-//        for (int col = 0; col < NUM_BRIGHT_COL; col++) {
-//            int index = row * NUM_BRIGHT_COL + col;
-//            double diff = cell.bright_array[index] - ch.bright_array[index];
-//            // absolute value of difference
-//            if (diff < 0) {
-//                diff *= -1;
-//            }
-//
-//            totalDiff += diff;
-//        }
-//    }
-//
-//    return totalDiff;
-
     double horDiff = ch.dx - cell.dx;
     double vertDiff = ch.dy - cell.dy;
-    if (horDiff < 0) {
-        horDiff *= -1;
-    }
+    double brightDiff = ch.avgBright - cell.avgBright;
+    horDiff = makePositive(horDiff);
+    vertDiff = makePositive(vertDiff);
+    brightDiff = makePositive(brightDiff);
 
-    if (vertDiff < 0) {
-        vertDiff *= -1;
-    }
-
-    return vertDiff + horDiff;
+    return vertDiff + horDiff + (brightDiff / 15);
 }
 
 // returns the character that is the best match for cell.
@@ -184,19 +133,6 @@ Character getBestChar(Cell cell, Character *chars, Font font) {
     }
 
     return chars[bestIndex];
-}
-
-// prints the brightness array of a cell
-// used for debugging
-void printCellBrightness(Cell cell) {
-    for (int r = 0; r < NUM_BRIGHT_ROW; r++) {
-        for (int c = 0; c < NUM_BRIGHT_COL; c++) {
-            int index = r * NUM_BRIGHT_COL + c;
-            printf("%f ", cell.bright_array[index]);
-        }
-        printf("\n");
-    }
-    printf("\n");
 }
 
 
