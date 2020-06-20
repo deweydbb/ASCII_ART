@@ -1,6 +1,10 @@
 output.jpg
 output.txt
 output.gif
+*.gif
+*.jpg
+*.txt
+*.text
 /images
 /imageOutput
 /cmake-build-debug
