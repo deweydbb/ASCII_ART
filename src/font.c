@@ -1,22 +1,12 @@
 #include "font.h"
+#include "fontInfo.h"
 
 extern const int NUM_BRIGHT_ROW;
 extern const int NUM_BRIGHT_COL;
 
-// loads and returns a font from a file
-// pre: file pointer must not be null
-Font loadFont(FILE *f) {
-    if (f == NULL) {
-        printf("File must not be null");
-        exit(1);
-    }
-
-    Font font;
-    // load width height and number of chars into font struct
-    fscanf(f, "%i\n", &(font.numChar));
-    fscanf(f, "%d\n", &font.width);
-    fscanf(f, "%d\n", &font.height);
-
+// loads and returns a font from fontInfo.h
+Font loadFont() {
+    Font font = {pixWidthOfChar, pixHeightOfChar, numCharInFont};
     return font;
 }
 
@@ -69,28 +59,19 @@ void setBrightnessChar(Character *ch, Font font, int rows, int cols) {
     }
 }
 
-// loads the next character from a given file
-// pre: file != null
-Character loadNextChar(FILE *f, Font font) {
-    if (f == NULL) {
-        printf("file must not be null");
-        exit(1);
-    }
-    int len = font.width * font.height;
-    // extra two, 1 for symbol at beginning of line, one for null char at end of string
-    char line[len + 2];
-
-    fscanf(f, "%s\n", line);
+// loads the next character from fontInfo.h
+Character loadNextChar(Font font, int charNum) {
+    // extra two, 1 for symbol at beginning of line, one for newline char at end of string
+    int len = font.width * font.height + 2;
+    int startIndex = len * charNum;
 
     Character c;
-
-    c.symbol = line[0];
+    c.symbol = fontInfo[startIndex];
     // equals sign is special char representing space.
     if (c.symbol == '=') {
         c.symbol = ' ';
     }
-    // allocate memory for value array, not necessary to free ever
-    // because values need to persist for running of program
+
     c.val_array = (short *) malloc(len * sizeof(short));
     if (c.val_array == NULL) {
         printf("failed to create value array for char %c", c.symbol);
@@ -98,9 +79,9 @@ Character loadNextChar(FILE *f, Font font) {
     }
 
     // starts at 1 because first character is the actual char the val_array represents
-    for (int i = 1; i < len + 1; i++) {
+    for (int i = 1; i < len; i++) {
         // characters should either be 1 or 0
-        if (line[i] == '0') {
+        if (fontInfo[startIndex + i] == '0') {
             // i minus one to offset i starting at 1
             c.val_array[i - 1] = 0;
         } else {
@@ -114,18 +95,12 @@ Character loadNextChar(FILE *f, Font font) {
     return c;
 }
 
-// loads all the characters from font file and returns a
+// loads all the characters from fontInfo.h and returns a
 // pointer to the array of characters
-// pre: file != null;
-Character *getCharArray(Font font, FILE *f) {
-    if (f == NULL) {
-        printf("file must not be null");
-        exit(1);
-    }
-
+Character *getCharArray(Font font) {
     Character *chars = (Character *) malloc(font.numChar * sizeof(Character));
     for (int i = 0; i < font.numChar; i++) {
-        chars[i] = loadNextChar(f, font);
+        chars[i] = loadNextChar(font, i);
     }
 
     return chars;
