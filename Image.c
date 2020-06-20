@@ -19,6 +19,7 @@ extern char *GIF_OUTPUT;
 // returns a struct that contains an array of pixels, width and height of an image
 // in grey scale. Exits program if unable to load image.
 Image *getImage(char *path) {
+    printf("image path: %s\n", path);
     int width, height, channels;
     unsigned char *pixels = stbi_load(path, &width, &height, &channels, 1);
 
@@ -75,18 +76,9 @@ Image *createPixelResult(const unsigned char *charResult, Character *chars, Font
 
 // given the order of characters in the ascii art, writes a jpg of the ascii art to IMG_OUTPUT
 // if the frameNum is -1. (meaning image is stand alone and not part of gif)
-void createJpgOfResult(Image *img, int frameNum) {
-    // get image representation of ascii art
-
-    char ch[30];
-    if (frameNum == -1) {
-        sprintf(ch, "%s", IMG_OUTPUT);
-    } else {
-        sprintf(ch, "../imageOutput/frame_0%d.jpg", frameNum);
-    }
-
+void createJpgOfResult(Image *img) {
     // write image to specified file path. comp of 1 means image is black and white
-    stbi_write_jpg(ch, img->width, img->height, 1, img->pix, img->width);
+    stbi_write_jpg(IMG_OUTPUT, img->width, img->height, 1, img->pix, img->width);
 
     // free up image
     free(img->pix);

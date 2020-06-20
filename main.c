@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Cell.h"
+#include "File.h"
 
 // determines the number of rows and columns of the
 // brightness array of fonts and characters
@@ -13,25 +14,11 @@ const int NUM_BRIGHT_COL = 2;
 // will be converted to one character.
 const int SEC_LEN = 1;
 
-char *IMG = "../images/testImage14.jpg";
-char *FONT_FILE = "../fontInfo.txt";
-char *TEXT_OUTPUT = "../result.txt";
-char *GIF_OUTPUT = "../output.gif";
-char *IMG_OUTPUT = "../results.jpg";
-
-// given a file path and mode, opens up a file
-// and returns a pointer to the file
-// exits program if fails to load file
-FILE *openFile(char *path, char *mode) {
-    FILE *f = fopen(path, mode);
-
-    if (f == NULL) {
-        printf("failed to load file: %s\n", path);
-        exit(1);
-    }
-
-    return f;
-}
+char *IMG;
+char FONT_FILE[16] = "../fontInfo.txt";
+char *TEXT_OUTPUT = NULL;
+char *GIF_OUTPUT = NULL;
+char *IMG_OUTPUT = NULL;
 
 // takes in an image and converts it to ascii art. Writes output to both
 // TEXT_OUTPUT and IMG_OUTPUT. (if gif writes img to ../imageOutput/frames_0x.jpg
@@ -56,7 +43,9 @@ Image *handleImage(Character *chars, Font font, Image *image) {
             // get best char to represent current cell
             Character bestChar = getBestChar(c, chars, font);
             // write best char to text file
-            fprintf(TEXT_FILE, "%c", bestChar.symbol);
+            if (TEXT_FILE != NULL) {
+                fprintf(TEXT_FILE, "%c", bestChar.symbol);
+            }
             resultChars[resultCharIndex] = bestChar.symbol;
             resultCharIndex++;
             // free up cell because we no longer need any of its values
@@ -64,10 +53,13 @@ Image *handleImage(Character *chars, Font font, Image *image) {
             free(c.bright_array);
         }
 
-        fprintf(TEXT_FILE, "\n");
+        if (TEXT_FILE != NULL) {
+            fprintf(TEXT_FILE, "\n");
+        }
     }
-
-    fclose(TEXT_FILE);
+    if (TEXT_FILE != NULL) {
+        fclose(TEXT_FILE);
+    }
 
     return createPixelResult(resultChars, chars, font, numCellsPerRow, numCellsPerCol);
 }
@@ -82,7 +74,6 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
         inputImg->width = gifIn->width;
         inputImg->height = gifIn->height;
         inputImg->pix = gifIn->pix + gifIn->width * gifIn->height * frameNum;
-        printf("input width: %d input height %d\n", inputImg->width, inputImg->height);
 
         imgPointer[frameNum] = handleImage(chars, font, inputImg);
     }
@@ -124,6 +115,9 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
 }
 
 int main() {
+    setInputAndOutputPath();
+    char *imgPath = IMG;
+
     FILE *fontInfo = openFile(FONT_FILE, "r");
     Font font = loadFont(fontInfo);
     // stores all characters of the font, and their pixel representations
@@ -131,19 +125,21 @@ int main() {
     fclose(fontInfo);
 
     // determine if input file is a GIF or a regular photo
-    if (strstr(IMG, ".gif")) {
+    if (strstr(imgPath, ".gif")) {
         // loads gifIn into memory
         Gif *gifIn = getGif(IMG);
         // converts each frame to image and then combines each frame into gif
         handleGif(gifIn, chars, font);
     } else {
         // input is an image
-        Image *image = getImage(IMG);
+        Image *image = getImage(imgPath);
         // -1 for frame number signals that this image is not part of gif
         // and the regular IMG_OUTPUT path should be used
         Image *output = handleImage(chars, font, image);
         // write to file and free up image
-        createJpgOfResult(output, -1);
+        if (IMG_OUTPUT != NULL) {
+            createJpgOfResult(output);
+        }
     }
 
     return 0;
