@@ -20,6 +20,8 @@ typedef struct {
     char symbol;
     short *val_array;
     double *bright_array;
+    double dx;
+    double dy;
 } Character;
 
 // returns a font struct based on a file

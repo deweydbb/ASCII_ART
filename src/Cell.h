@@ -9,6 +9,8 @@ typedef struct {
     int height;
     short *val_array;
     double *bright_array;
+    double dx;
+    double dy;
 } Cell;
 
 // given an image and the row and column of the cell

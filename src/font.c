@@ -59,6 +59,52 @@ void setBrightnessChar(Character *ch, Font font, int rows, int cols) {
     }
 }
 
+double getHorSlope(Character *ch, Font font, int row) {
+    double avgSlope = 0;
+
+    for (int col1 = 0; col1 < font.width; col1++) {
+        for (int col2 = col1 + 1; col2 < font.width; col2++) {
+            int indexBase = row * font.width;
+            avgSlope += ch->val_array[indexBase + col1] - ch->val_array[indexBase + col2];
+        }
+    }
+
+    return avgSlope /= (font.width - 1) * (font.width / 2.0);
+}
+
+double getVertSlope(Character *ch, Font font, int col) {
+    double avgSlope = 0;
+
+    for (int row1 = 0; row1 < font.height; row1++) {
+        for (int row2 = row1 + 1; row2 < font.height; row2++) {
+            int index1 = row1 * font.width + col;
+            int index2 = row2 * font.width + col;
+            avgSlope += ch->val_array[index1] - ch->val_array[index2];
+        }
+    }
+
+    return avgSlope /= (font.height - 1) * (font.height / 2.0);
+}
+
+void setSlopes(Character *ch, Font font) {
+    double horSlope = 0;
+    double vertSlope = 0;
+
+    for (int row = 0; row < font.height; row++) {
+        horSlope += getHorSlope(ch, font, row);
+    }
+
+    for (int col = 0; col < font.width; col++) {
+        vertSlope += getVertSlope(ch, font, col);
+    }
+
+    horSlope /= font.height;
+    vertSlope /= font.width;
+
+    ch->dx = horSlope;
+    ch->dy = vertSlope;
+}
+
 // loads the next character from fontInfo.h
 Character loadNextChar(Font font, int charNum) {
     // extra two, 1 for symbol at beginning of line, one for newline char at end of string
@@ -91,6 +137,7 @@ Character loadNextChar(Font font, int charNum) {
     }
 
     setBrightnessChar(&c, font, NUM_BRIGHT_ROW, NUM_BRIGHT_COL);
+    setSlopes(&c, font);
 
     return c;
 }

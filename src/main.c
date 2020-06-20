@@ -6,13 +6,13 @@
 
 // determines the number of rows and columns of the
 // brightness array of fonts and characters
-const int NUM_BRIGHT_ROW = 4;
-const int NUM_BRIGHT_COL = 2;
+const int NUM_BRIGHT_ROW = 2;
+const int NUM_BRIGHT_COL = 1;
 // SEC_LEN specifies the length of each section.
 // For example if SEC_LEN is 2, the section will be made up of a square of 4 pixels (since 2
 // squared is 4). This mean that each cell of the image that is 4 pixels wide and 8 pixels wide
 // will be converted to one character.
-const int SEC_LEN = 1;
+const int SEC_LEN = 2;
 
 char *IMG = NULL;
 char *TEXT_OUTPUT = NULL;
@@ -124,6 +124,7 @@ int main() {
     Font font = loadFont();
     // stores all characters of the font, and their pixel representations
     Character *chars = getCharArray(font);
+
 
     // determine if input file is a GIF or a regular photo
     if (strstr(IMG, ".gif")) {
