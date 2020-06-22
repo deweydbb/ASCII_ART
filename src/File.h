@@ -13,6 +13,8 @@ FILE *openFile(char *path, char *mode);
 // a popup window with given info
 void sendPopup(char *title, char *msg);
 
+int getSecLenFromUser();
+
 // get input and output paths from user
 void setInputAndOutputPath();
 

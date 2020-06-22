@@ -12,7 +12,7 @@ const int NUM_BRIGHT_COL = 2;
 // For example if SEC_LEN is 2, the section will be made up of a square of 4 pixels (since 2
 // squared is 4). This mean that each cell of the image that is 4 pixels wide and 8 pixels wide
 // will be converted to one character.
-const int SEC_LEN = 1;
+int SEC_LEN = 1;
 
 char *IMG = NULL;
 char *TEXT_OUTPUT = NULL;
@@ -116,6 +116,7 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
 int main() {
     // get input and output paths from user
     setInputAndOutputPath();
+    SEC_LEN = getSecLenFromUser();
 
     Font font = loadFont();
     // stores all characters of the font, and their pixel representations
