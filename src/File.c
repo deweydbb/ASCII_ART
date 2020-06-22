@@ -38,6 +38,40 @@ void sendPopup(char *title, char *msg) {
     tinyfd_messageBox(title, msg,"ok", "info", 0);
 }
 
+// asks the user if they want to quit the program. If no, returns
+// if yes exits the program
+void shouldExit(char *msg) {
+    int result = tinyfd_messageBox("", msg,"yesno", "question", 0);
+
+    if (result == 1) {
+        exit(0);
+    }
+}
+
+// asks user for secLen value for conversion. Guaranteed to return value between [1, 8].
+// if user does not enter a valid number, then they can chose to exit the program
+int getSecLenFromUser() {
+    char *input;
+
+    input = tinyfd_inputBox("", "Please enter a whole number from 1 to 8.          "
+                                "The lower the number the higher the resolution."
+                                " Type exit if you want to exit the program.", NULL);
+
+    if (input == NULL || strlen(input) != 1) {
+        shouldExit("You did not enter a valid number. Would you like to exit the program?");
+        return getSecLenFromUser();
+    }
+
+    const int OFFSET = 48;
+    int value = (int) input[0] - OFFSET;
+
+    if (value < 1 || value > 8) {
+        return getSecLenFromUser();
+    }
+
+    return value;
+}
+
 // set the global variable IMG which stores the path of the input image
 // uses gui to have user select file they want to convert
 void setInputPath() {
@@ -53,15 +87,14 @@ void setInputPath() {
             0);
 
     if (inputPath == NULL) {
-        tinyfd_messageBox("Error", "You did not select an image. Exiting program.",
-                          "ok", "info", 0);
-        exit(0);
+        shouldExit("You did not select a file. Would you like to exit the program?");
+        setInputPath();
     }
-
 
     IMG = strdup(inputPath);
 }
 
+// determines if a file is a gif
 int isGif(char *path) {
     unsigned int len = strlen(path);
     const char *GIF = "gif";
@@ -97,8 +130,8 @@ void setOutputPath(int isInputGif, int isOutputText) {
             NULL);
 
     if (outputPath == NULL) {
-        tinyfd_messageBox("Error", "You did not select a file. Exiting program.",
-                          "ok", "info", 0);
+        shouldExit("You did not select a file. Would you like to exit the program?");
+        setOutputPath(isInputGif, isOutputText);
     }
     // set correct global variable based on input file type
     if (isOutputText) {
