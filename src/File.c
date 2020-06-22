@@ -53,9 +53,9 @@ void shouldExit(char *msg) {
 int getSecLenFromUser() {
     char *input;
 
-    input = tinyfd_inputBox("", "Please enter a whole number from 1 to 8.          "
-                                "The lower the number the higher the resolution."
-                                " Type exit if you want to exit the program.", NULL);
+    input = tinyfd_inputBox("", "Please enter a whole number from 1 to 8."
+                                " The lower the number the higher the resolution."
+                                " Type exit if you want to exit the program.", "1");
 
     if (input == NULL || strlen(input) != 1) {
         shouldExit("You did not enter a valid number. Would you like to exit the program?");
@@ -75,13 +75,13 @@ int getSecLenFromUser() {
 // set the global variable IMG which stores the path of the input image
 // uses gui to have user select file they want to convert
 void setInputPath() {
-    char const *filterPatterns[8] = {"*.jpg", "*.png", "*.gif", "*.tga",
-                                     "*.bmp", "*.psd", "*.hdr", "*.pic"};
+    char const *filterPatterns[9] = {"*.jpg", "*.png", "*.gif", "*.tga",
+                                     "*.bmp", "*.psd", "*.hdr", "*.pic", "*.jpeg"};
 
     char *inputPath = tinyfd_openFileDialog(
             "Please pick an image to convert",
             "",
-            8,
+            9,
             filterPatterns,
             NULL,
             0);

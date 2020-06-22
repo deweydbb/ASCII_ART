@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
+#include <unistd.h>
 #include "Cell.h"
 #include "File.h"
 
@@ -35,6 +37,7 @@ Image *handleImage(Character *chars, Font font, Image *image) {
     // loop through each cell of image, determine best character
     // and write that character to a file
     for (int row = 0; row < numCellsPerRow; row++) {
+
         for (int col = 0; col < numCellsPerCol; col++) {
             Cell c = getCell(image, row, col, SEC_LEN);
             // get best char to represent current cell
@@ -50,6 +53,7 @@ Image *handleImage(Character *chars, Font font, Image *image) {
             // free up cell because we no longer need any of its values
             free(c.val_array);
             free(c.bright_array);
+
         }
 
         if (TEXT_FILE != NULL) {
@@ -113,6 +117,30 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
     ge_close_gif(gifOut);
 }
 
+void *progressThread(void *arg) {
+    char msg[1024];
+
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+
+    printf("converting");
+
+    while (1) {
+        printf(".");
+        sleep(1);
+        printf(".");
+        sleep(1);
+        printf(".");
+        sleep(1);
+        fflush(stdout);
+        printf("\b\b\b");
+        printf("   ");
+        printf("\b\b\b");
+        fflush(stdout);
+        sleep(1);
+    }
+}
+
 int main() {
     // get input and output paths from user
     setInputAndOutputPath();
@@ -122,8 +150,15 @@ int main() {
     // stores all characters of the font, and their pixel representations
     Character *chars = getCharArray(font);
 
+    pthread_t threadId;
+    int error = pthread_create(&threadId, NULL, &progressThread, NULL);
+    if (error != 0) {
+        printf("\nThread can't be created :[%s]", strerror(error));
+    }
+
     // determine if input file is a GIF or a regular photo
     if (strstr(IMG, ".gif")) {
+        inputIsGif = 1;
         // loads gifIn into memory
         Gif *gifIn = getGif(IMG);
         // converts each frame to image and then combines each frame into gif
@@ -140,6 +175,8 @@ int main() {
         }
     }
 
+    pthread_cancel(threadId);
+    pthread_join(threadId, NULL);
     sendPopup("", "Conversion completed successfully!");
 
     return 0;
