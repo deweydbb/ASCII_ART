@@ -132,7 +132,15 @@ void setOutputPath(int isInputGif, int isOutputText) {
     if (outputPath == NULL) {
         shouldExit("You did not select a file. Would you like to exit the program?");
         setOutputPath(isInputGif, isOutputText);
+        return;
     }
+
+    if (strcmp(outputPath, IMG) == 0) {
+        sendPopup("Error", "The input file cannot be the same as the output file!");
+        setOutputPath(isInputGif, isOutputText);
+        return;
+    }
+
     // set correct global variable based on input file type
     if (isOutputText) {
         TEXT_OUTPUT = strdup(outputPath);
