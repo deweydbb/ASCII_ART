@@ -210,41 +210,48 @@ int main() {
     // stores all characters of the font, and their pixel representations
     Character *chars = getCharArray(font);
 
-    // get input and output paths from user
-    setInputAndOutputPath();
-    SEC_LEN = getSecLenFromUser();
-
     pthread_t threadId;
     int error = pthread_create(&threadId, NULL, &progressThread, NULL);
     if (error != 0) {
         printf("\nProgress thread can't be created :[%s]", strerror(error));
     }
 
-    // determine if input file is a GIF or a regular photo
-    if (strstr(IMG, ".gif")) {
-        inputIsGif = 1;
-        // loads gifIn into memory
-        Gif *gifIn = getGif(IMG);
-        // converts each frame to image and then combines each frame into gif
-        handleGif(gifIn, chars, font);
-    } else {
-        // input is an image
-        Image *image = getImage(IMG);
-        // -1 for frame number signals that this image is not part of gif
-        // and the regular IMG_OUTPUT path should be used
-        Image *output = handleImage(chars, font, image);
-        if (IMG_OUTPUT != NULL) {
-            updateStatusMessage("saving image", 0, 0);
-            // create jpg of ascii art
-            createJpgOfResult(output);
+    do {
+        // get input and output paths from user
+        setInputAndOutputPath();
+        SEC_LEN = getSecLenFromUser();
+
+        updateStatusMessage("converting", 0, 0);
+
+        // determine if input file is a GIF or a regular photo
+        if (strstr(IMG, ".gif")) {
+            inputIsGif = 1;
+            // loads gifIn into memory
+            Gif *gifIn = getGif(IMG);
+            // converts each frame to image and then combines each frame into gif
+            handleGif(gifIn, chars, font);
+        } else {
+            // input is an image
+            Image *image = getImage(IMG);
+            // -1 for frame number signals that this image is not part of gif
+            // and the regular IMG_OUTPUT path should be used
+            Image *output = handleImage(chars, font, image);
+            if (IMG_OUTPUT != NULL) {
+                updateStatusMessage("saving image", 0, 0);
+                // create jpg of ascii art
+                createJpgOfResult(output);
+            }
         }
-    }
+        
+        updateStatusMessage("", 0, 0);
+        sendPopup("", "Conversion completed successfully!");
+        // free image paths and set them all to null
+        resetPaths();
+
+    } while(continueConverting());
 
     pthread_cancel(threadId);
     pthread_join(threadId, NULL);
-    sendPopup("", "Conversion completed successfully!");
-    // free image paths and set them all to null
-    resetPaths();
 
     // free font and characters in font
     for (int i = 0; i < font.numChar; i++) {

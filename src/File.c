@@ -32,6 +32,10 @@ FILE *openFile(char *path, char *mode) {
     return f;
 }
 
+int continueConverting() {
+    return tinyfd_messageBox("", "Do you want to convert another image?", "yesno", "question", 0);
+}
+
 void resetPaths() {
     if (GIF_OUTPUT != NULL) {
         free(GIF_OUTPUT);
