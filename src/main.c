@@ -3,6 +3,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <time.h>
 #include "Cell.h"
 #include "File.h"
 
@@ -82,24 +83,45 @@ Image *handleImage(Character *chars, Font font, Image *image) {
     return createPixelResult(resultChars, chars, font, numCellsPerRow, numCellsPerCol);
 }
 
+void *handleFrames(void *gifInfo) {
+    GifThreadInfo *gifThreadInfo = gifInfo;
+
+    for (int frameNum = gifThreadInfo->startFrame; frameNum < gifThreadInfo->endFrame; frameNum++) {
+        Image *inputImg = malloc(sizeof(Image));
+        inputImg->width = gifThreadInfo->gifIn->width;
+        inputImg->height = gifThreadInfo->gifIn->height;
+        inputImg->pix = gifThreadInfo->gifIn->pix + gifThreadInfo->gifIn->width * gifThreadInfo->gifIn->height * frameNum;
+
+        gifThreadInfo->asciiImages[frameNum] = handleImage(gifThreadInfo->chars, *gifThreadInfo->font, inputImg);
+    }
+}
+
 // converts a gif to separate ascii art images and then rejoins images as
 // frames to create a gif of ascii art
 void handleGif(Gif *gifIn, Character *chars, Font font) {
     // stores ascii version of frames for gif
-    Image *imgPointer[gifIn->numFrames];
+    Image **imgPointer = malloc(gifIn->numFrames * sizeof(Image));
+    int numThreads = 8;
 
-    // loop through each frame from input gif and covert it to ascii art
-    for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
-        pthread_mutex_lock(&statusLock);
-        sprintf(status, "converting frame %d of %d", frameNum, gifIn->numFrames);
-        pthread_mutex_unlock(&statusLock);
+    GifThreadInfo gifInfo[numThreads];
+    pthread_t pIds[numThreads];
 
-        Image *inputImg = malloc(sizeof(Image));
-        inputImg->width = gifIn->width;
-        inputImg->height = gifIn->height;
-        inputImg->pix = gifIn->pix + gifIn->width * gifIn->height * frameNum;
+    for (int i = 0; i < numThreads; i++) {
+        gifInfo[i].gifIn = gifIn;
+        gifInfo[i].chars = chars;
+        gifInfo[i].font = &font;
+        gifInfo[i].asciiImages = imgPointer;
+        gifInfo[i].startFrame = i * gifIn->numFrames / numThreads;
+        gifInfo[i].endFrame = (i + 1) * gifIn->numFrames / numThreads;
 
-        imgPointer[frameNum] = handleImage(chars, font, inputImg);
+        int error = pthread_create(&(pIds[i]), NULL, &handleFrames, &gifInfo[i]);
+        if (error != 0) {
+            printf("\nThread can't be created :[%s]", strerror(error));
+        }
+    }
+
+    for(int i = 0; i < numThreads; i++) {
+        pthread_join(pIds[i], NULL);
     }
 
     free(gifIn->pix);
@@ -132,6 +154,8 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
         ge_add_frame(gifOut, gifIn->delay / gifIn->numFrames);
     }
 
+
+    free(imgPointer);
     // free up gifIn
     free(gifIn);
     // write gif to file and clean up
@@ -180,6 +204,8 @@ int main() {
     // stores all characters of the font, and their pixel representations
     Character *chars = getCharArray(font);
 
+    clock_t start = clock();
+
     pthread_t threadId;
     int error = pthread_create(&threadId, NULL, &progressThread, NULL);
     if (error != 0) {
@@ -211,6 +237,11 @@ int main() {
 
     pthread_cancel(threadId);
     pthread_join(threadId, NULL);
+
+    clock_t stop = clock();
+
+    printf("time: %.4ld", stop - start);
+
     sendPopup("", "Conversion completed successfully!");
 
     return 0;

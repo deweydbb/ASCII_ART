@@ -29,6 +29,15 @@ typedef struct {
     unsigned char *pix;
 } Gif;
 
+typedef struct {
+    int startFrame;
+    int endFrame;
+    Gif *gifIn;
+    Character *chars;
+    Font *font;
+    Image **asciiImages;
+} GifThreadInfo;
+
 // loads in gif from file
 Gif *getGif(const char *filename);
 
