@@ -169,21 +169,25 @@ void *progressThread(void *arg) {
         printf(".");
         sleep(1);
         printf(".");
+        sleep(1);
         //end ellipsis
         fflush(stdout);
         // move cursor to start of line
-        for (int i = 0; i < oldStatusLen + 3; i++) {
-            printf("\b");
-        }
-        // write over status message and ellipsis with spaces
-        for (int i = 0; i < oldStatusLen + 3; i++) {
-            printf(" ");
-        }
-        // move cursor to start of line
-        for (int i = 0; i < oldStatusLen + 3; i++) {
-            printf("\b");
+        int len = (oldStatusLen + 3) * 3 + 1;
+        char delete[len];
+        int index = 0;
+        while (index < len - 1) {
+            if (index < oldStatusLen + 3 || index >= (oldStatusLen + 3) * 2) {
+                delete[index] = '\b';
+            } else {
+                delete[index] = ' ';
+            }
+            index++;
         }
 
+        delete[len - 1] = 0;
+
+        printf("%s", delete);
         fflush(stdout);
     }
 }
