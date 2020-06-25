@@ -85,8 +85,6 @@ int getSecLenFromUser() {
     const int OFFSET = 48;
     int value = (int) input[0] - OFFSET;
 
-    free(input);
-
     if (value < 1 || value > 8) {
         return getSecLenFromUser();
     }
@@ -114,6 +112,7 @@ void setInputPath() {
     }
 
     IMG = strdup(inputPath);
+    free(inputPath);
 }
 
 // determines if a file is a gif

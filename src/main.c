@@ -48,7 +48,7 @@ Image *handleImage(Character *chars, Font font, Image *image) {
     int numCellsPerCol = image->width / (SEC_LEN * NUM_BRIGHT_COL);
 
     // keeps track of order of characters to allow for faster creation of the image output
-    unsigned char *resultChars = malloc(numCellsPerRow * numCellsPerCol * sizeof(char));
+    char *resultChars = malloc(numCellsPerRow * numCellsPerCol * sizeof(char));
     int resultCharIndex = 0;
 
     // loop through each cell of image, determine best character
@@ -173,7 +173,7 @@ void *progressThread(void *arg) {
         // get current status
         pthread_mutex_lock(&statusLock);
         int oldStatusLen = strlen(status);
-        printf(status);
+        printf("%s", status);
         pthread_mutex_unlock(&statusLock);
         // start rotating ellipsis
         sleep(1);

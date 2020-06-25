@@ -39,7 +39,7 @@ Image *getImage(char *path) {
 // helper method for createJpgOfResult
 // given the order of characters as they appear in the ascii art, creates an image that holds the info necessary to
 // write the image to a jpg file
-Image *createPixelResult(const unsigned char *charResult, Character *chars, Font font, int charPerRow, int charPerCol) {
+Image *createPixelResult(char *charResult, Character *chars, Font font, int charPerRow, int charPerCol) {
     Image *result = malloc(sizeof(Image));
     // set width and height of image
     result->width = font.width * charPerCol;
@@ -153,6 +153,8 @@ Gif *getGif(const char *filename) {
     result->numFrames = frames;
     result->delay = *delays;
     result->pix = loadedGif;
+
+    free(delays);
 
     return result;
 }

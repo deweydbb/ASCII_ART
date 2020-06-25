@@ -16,7 +16,7 @@ typedef struct {
 // based on the given path
 Image *getImage(char *path);
 
-Image *createPixelResult(const unsigned char *charResult, Character *chars, Font font, int charPerRow, int charPerCol);
+Image *createPixelResult(char *charResult, Character *chars, Font font, int charPerRow, int charPerCol);
 
 // given the order of characters in the ascii art, writes a jpg of the ascii art to IMG_OUTPUT
 void createJpgOfResult(Image *image);
