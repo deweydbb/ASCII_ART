@@ -3,7 +3,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <time.h>
 #include "Cell.h"
 #include "File.h"
 
@@ -26,6 +25,19 @@ pthread_mutex_t statusLock;
 char status[1024] = "converting";
 int inputIsGif = 0;
 
+//update status message on terminal
+void updateStatusMessage(char *msg, int firstNum, int secondNum) {
+    pthread_mutex_lock(&statusLock);
+
+    if (firstNum == 0 && secondNum == 0) {
+        sprintf(status, "%s", msg);
+    } else {
+        sprintf(status, "%s %d of %d", msg, firstNum, secondNum);
+    }
+
+    pthread_mutex_unlock(&statusLock);
+}
+
 // takes in an image and converts it to ascii art. Writes output to both
 // TEXT_OUTPUT and IMG_OUTPUT. (if gif writes img to ../imageOutput/frames_0x.jpg
 //_0x is based on the frame num.
@@ -44,10 +56,7 @@ Image *handleImage(Character *chars, Font font, Image *image) {
     for (int row = 0; row < numCellsPerRow; row++) {
         for (int col = 0; col < numCellsPerCol; col++) {
             if (!inputIsGif) {
-                pthread_mutex_lock(&statusLock);
-                sprintf(status, "analyzing cell %d of %d",
-                        row * numCellsPerCol + col, numCellsPerCol * numCellsPerRow);
-                pthread_mutex_unlock(&statusLock);
+                updateStatusMessage("analyzing cell", row * numCellsPerCol + col, numCellsPerCol * numCellsPerRow);
             }
 
             Cell c = getCell(image, row, col, SEC_LEN);
@@ -76,13 +85,13 @@ Image *handleImage(Character *chars, Font font, Image *image) {
     }
 
     if (!inputIsGif) {
-        pthread_mutex_lock(&statusLock);
-        sprintf(status, "creating image");
-        pthread_mutex_unlock(&statusLock);
+        updateStatusMessage("creating image", 0, 0);
     }
     return createPixelResult(resultChars, chars, font, numCellsPerRow, numCellsPerCol);
 }
 
+// function for multi threading gif conversion
+// converts given range of frames to ascii art
 void *handleFrames(void *gifInfo) {
     GifThreadInfo *gifThreadInfo = gifInfo;
 
@@ -105,16 +114,16 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
 
     GifThreadInfo gifInfo[numThreads];
     pthread_t pIds[numThreads];
+    // creates the threads for converting each frame to ascii
+    for (int threadNum = 0; threadNum < numThreads; threadNum++) {
+        gifInfo[threadNum].gifIn = gifIn;
+        gifInfo[threadNum].chars = chars;
+        gifInfo[threadNum].font = &font;
+        gifInfo[threadNum].asciiImages = imgPointer;
+        gifInfo[threadNum].startFrame = threadNum * gifIn->numFrames / numThreads;
+        gifInfo[threadNum].endFrame = (threadNum + 1) * gifIn->numFrames / numThreads;
 
-    for (int i = 0; i < numThreads; i++) {
-        gifInfo[i].gifIn = gifIn;
-        gifInfo[i].chars = chars;
-        gifInfo[i].font = &font;
-        gifInfo[i].asciiImages = imgPointer;
-        gifInfo[i].startFrame = i * gifIn->numFrames / numThreads;
-        gifInfo[i].endFrame = (i + 1) * gifIn->numFrames / numThreads;
-
-        int error = pthread_create(&(pIds[i]), NULL, &handleFrames, &gifInfo[i]);
+        int error = pthread_create(&(pIds[threadNum]), NULL, &handleFrames, &gifInfo[threadNum]);
         if (error != 0) {
             printf("\nThread can't be created :[%s]", strerror(error));
         }
@@ -129,31 +138,11 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
     ge_GIF *gifOut = getGifOut(imgPointer[0]);
 
     for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
-        Image *image = imgPointer[frameNum];
-        pthread_mutex_lock(&statusLock);
-        sprintf(status, "saving frame %d of %d", frameNum, gifIn->numFrames);
-        pthread_mutex_unlock(&statusLock);
-
-        // loop through every pixel in frame
-        for (int row = 0; row < image->height; row++) {
-            for (int col = 0; col < image->width; col++) {
-                int index = row * image->width + col;
-                // get value of pixel in ascii art. Should always be 0 or 255
-                int val = image->pix[index];
-
-                if (val == 0) {
-                    // mark pixel in gifOut frame as black
-                    gifOut->frame[index] = 0;
-                } else {
-                    // mark pixel in gifOut frame as white
-                    gifOut->frame[index] = 1;
-                }
-            }
-        }
+        updateStatusMessage("saving frame", frameNum, gifOut->nframes);
+        saveGifFrame(imgPointer[frameNum], gifOut);
         // add frame to gifOut with appropriate delay
         ge_add_frame(gifOut, gifIn->delay / gifIn->numFrames);
     }
-
 
     free(imgPointer);
     // free up gifIn
@@ -162,31 +151,35 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
     ge_close_gif(gifOut);
 }
 
+// displays status message and rotating ellipsis on command line
 void *progressThread(void *arg) {
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
     while (1) {
+        // get current status
         pthread_mutex_lock(&statusLock);
         int oldStatusLen = strlen(status);
         printf(status);
         pthread_mutex_unlock(&statusLock);
+        // start rotating ellipsis
         sleep(1);
         printf(".");
         sleep(1);
         printf(".");
         sleep(1);
         printf(".");
-        sleep(1);
+        //end ellipsis
         fflush(stdout);
+        // move cursor to start of line
         for (int i = 0; i < oldStatusLen + 3; i++) {
             printf("\b");
         }
-
+        // write over status message and ellipsis with spaces
         for (int i = 0; i < oldStatusLen + 3; i++) {
             printf(" ");
         }
-
+        // move cursor to start of line
         for (int i = 0; i < oldStatusLen + 3; i++) {
             printf("\b");
         }
@@ -196,20 +189,18 @@ void *progressThread(void *arg) {
 }
 
 int main() {
-    // get input and output paths from user
-    setInputAndOutputPath();
-    SEC_LEN = getSecLenFromUser();
-
     Font font = loadFont();
     // stores all characters of the font, and their pixel representations
     Character *chars = getCharArray(font);
 
-    clock_t start = clock();
+    // get input and output paths from user
+    setInputAndOutputPath();
+    SEC_LEN = getSecLenFromUser();
 
     pthread_t threadId;
     int error = pthread_create(&threadId, NULL, &progressThread, NULL);
     if (error != 0) {
-        printf("\nThread can't be created :[%s]", strerror(error));
+        printf("\nProgress thread can't be created :[%s]", strerror(error));
     }
 
     // determine if input file is a GIF or a regular photo
@@ -226,22 +217,14 @@ int main() {
         // and the regular IMG_OUTPUT path should be used
         Image *output = handleImage(chars, font, image);
         if (IMG_OUTPUT != NULL) {
+            updateStatusMessage("saving image", 0, 0);
             // create jpg of ascii art
-            pthread_mutex_lock(&statusLock);
-            sprintf(status, "saving image");
-            pthread_mutex_unlock(&statusLock);
-
             createJpgOfResult(output);
         }
     }
 
     pthread_cancel(threadId);
     pthread_join(threadId, NULL);
-
-    clock_t stop = clock();
-
-    printf("time: %.4ld", stop - start);
-
     sendPopup("", "Conversion completed successfully!");
 
     return 0;

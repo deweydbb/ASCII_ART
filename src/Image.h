@@ -38,6 +38,9 @@ typedef struct {
     Image **asciiImages;
 } GifThreadInfo;
 
+// saves each pixel of the given image to the output gif
+void saveGifFrame(Image *image, ge_GIF *gifOut);
+
 // loads in gif from file
 Gif *getGif(const char *filename);
 

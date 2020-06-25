@@ -89,6 +89,26 @@ void createJpgOfResult(Image *img) {
  * ----------------------
  */
 
+// saves each pixel of the given image to the output gif
+void saveGifFrame(Image *image, ge_GIF *gifOut) {
+    // loop through every pixel in frame
+    for (int row = 0; row < image->height; row++) {
+        for (int col = 0; col < image->width; col++) {
+            int index = row * image->width + col;
+            // get value of pixel in ascii art. Should always be 0 or 255
+            int val = image->pix[index];
+
+            if (val == 0) {
+                // mark pixel in gifOut frame as black
+                gifOut->frame[index] = 0;
+            } else {
+                // mark pixel in gifOut frame as white
+                gifOut->frame[index] = 1;
+            }
+        }
+    }
+}
+
 // loads in gif from file
 Gif *getGif(const char *filename) {
     FILE *gif = fopen(filename, "rb");
