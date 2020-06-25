@@ -9,6 +9,8 @@
 // exits program if fails to load file
 FILE *openFile(char *path, char *mode);
 
+void resetPaths();
+
 // given a title and a message, sends a
 // a popup window with given info
 void sendPopup(char *title, char *msg);

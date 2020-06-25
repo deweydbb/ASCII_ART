@@ -69,6 +69,8 @@ Image *createPixelResult(const unsigned char *charResult, Character *chars, Font
             }
         }
     }
+
+    free(charResult);
     // return image
     return result;
 }
@@ -107,6 +109,9 @@ void saveGifFrame(Image *image, ge_GIF *gifOut) {
             }
         }
     }
+
+    free(image->pix);
+    free(image);
 }
 
 // loads in gif from file

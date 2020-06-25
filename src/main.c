@@ -87,6 +87,18 @@ Image *handleImage(Character *chars, Font font, Image *image) {
     if (!inputIsGif) {
         updateStatusMessage("creating image", 0, 0);
     }
+    // if out put is not a gif, free up the input image
+    if (GIF_OUTPUT == NULL) {
+        free(image->pix);
+        free(image);
+    }
+    // if output is a text file, then it is not necessary to create a pixel
+    // result of the ascii art
+    if (TEXT_FILE != NULL) {
+        free(resultChars);
+        return NULL;
+    }
+
     return createPixelResult(resultChars, chars, font, numCellsPerRow, numCellsPerCol);
 }
 
@@ -102,6 +114,7 @@ void *handleFrames(void *gifInfo) {
         inputImg->pix = gifThreadInfo->gifIn->pix + gifThreadInfo->gifIn->width * gifThreadInfo->gifIn->height * frameNum;
 
         gifThreadInfo->asciiImages[frameNum] = handleImage(gifThreadInfo->chars, *gifThreadInfo->font, inputImg);
+        free(inputImg);
     }
 }
 
@@ -128,7 +141,7 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
             printf("\nThread can't be created :[%s]", strerror(error));
         }
     }
-
+    // wait for all threads to finish converting their frames
     for(int i = 0; i < numThreads; i++) {
         pthread_join(pIds[i], NULL);
     }
@@ -138,7 +151,7 @@ void handleGif(Gif *gifIn, Character *chars, Font font) {
     ge_GIF *gifOut = getGifOut(imgPointer[0]);
 
     for (int frameNum = 0; frameNum < gifIn->numFrames; frameNum++) {
-        updateStatusMessage("saving frame", frameNum, gifOut->nframes);
+        updateStatusMessage("saving frame", frameNum, gifIn->numFrames);
         saveGifFrame(imgPointer[frameNum], gifOut);
         // add frame to gifOut with appropriate delay
         ge_add_frame(gifOut, gifIn->delay / gifIn->numFrames);
@@ -230,6 +243,15 @@ int main() {
     pthread_cancel(threadId);
     pthread_join(threadId, NULL);
     sendPopup("", "Conversion completed successfully!");
+    // free image paths and set them all to null
+    resetPaths();
+
+    // free font and characters in font
+    for (int i = 0; i < font.numChar; i++) {
+        free(chars[i].val_array);
+        free(chars[i].bright_array);
+    }
+    free(chars);
 
     return 0;
 }
