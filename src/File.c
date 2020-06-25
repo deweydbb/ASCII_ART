@@ -32,6 +32,26 @@ FILE *openFile(char *path, char *mode) {
     return f;
 }
 
+void resetPaths() {
+    if (GIF_OUTPUT != NULL) {
+        free(GIF_OUTPUT);
+    }
+
+    if (IMG_OUTPUT != NULL) {
+        free(IMG_OUTPUT);
+    }
+
+    if (TEXT_OUTPUT != NULL) {
+        free(TEXT_OUTPUT);
+    }
+
+    free(IMG);
+    IMG = NULL;
+    GIF_OUTPUT = NULL;
+    IMG_OUTPUT = NULL;
+    TEXT_OUTPUT = NULL;
+}
+
 // given a title and a message, sends a
 // a popup window with given info
 void sendPopup(char *title, char *msg) {
@@ -64,6 +84,8 @@ int getSecLenFromUser() {
 
     const int OFFSET = 48;
     int value = (int) input[0] - OFFSET;
+
+    free(input);
 
     if (value < 1 || value > 8) {
         return getSecLenFromUser();
