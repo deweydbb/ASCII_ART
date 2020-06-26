@@ -116,6 +116,8 @@ void *handleFrames(void *gifInfo) {
         gifThreadInfo->asciiImages[frameNum] = handleImage(gifThreadInfo->chars, *gifThreadInfo->font, inputImg);
         free(inputImg);
     }
+
+    return NULL;
 }
 
 // converts a gif to separate ascii art images and then rejoins images as
